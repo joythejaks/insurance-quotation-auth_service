@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +16,7 @@ import (
 	"github.com/jordisetiawan/insurance-auth-service/internal/router"
 	"github.com/jordisetiawan/insurance-auth-service/internal/service"
 	"github.com/jordisetiawan/insurance-auth-service/internal/utils"
+	"go.uber.org/zap"
 )
 
 // @title Insurance Auth Service API
@@ -33,7 +33,7 @@ func main() {
 
 	db, err := database.NewPostgres(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		utils.Log.Fatal("Failed to connect to database", zap.Error(err))
 	}
 
 	// Initialize layers
@@ -52,22 +52,22 @@ func main() {
 
 	// Graceful shutdown logic
 	go func() {
-		log.Printf("Auth Service starting on port %s", cfg.AppPort)
+		utils.Log.Info("Auth Service starting", zap.String("port", cfg.AppPort))
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
+			utils.Log.Fatal("Listen failed", zap.Error(err))
 		}
 	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	utils.Log.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		utils.Log.Fatal("Server forced to shutdown", zap.Error(err))
 	}
 
-	log.Println("Server exiting")
+	utils.Log.Info("Server exiting")
 }

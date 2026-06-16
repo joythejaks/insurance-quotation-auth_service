@@ -9,6 +9,7 @@ import (
 type Claims struct {
 	UserID      string   `json:"user_id"`
 	Email       string   `json:"email"`
+	FullName    string   `json:"full_name"`
 	Role        string   `json:"role"`
 	Permissions []string `json:"permissions"`
 
@@ -18,6 +19,7 @@ type Claims struct {
 func GenerateToken(
 	userID string,
 	email string,
+	fullName string,
 	role string,
 	permissions []string,
 	secret string,
@@ -27,6 +29,7 @@ func GenerateToken(
 	claims := Claims{
 		UserID:      userID,
 		Email:       email,
+		FullName:    fullName,
 		Role:        role,
 		Permissions: permissions,
 

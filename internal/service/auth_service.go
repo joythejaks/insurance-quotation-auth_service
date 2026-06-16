@@ -106,13 +106,13 @@ func (s *AuthService) Login(req dto.LoginRequest) (*model.User, []string, string
 	}
 
 	// Access Token (15 menit)
-	accessToken, err := utils.GenerateToken(user.ID.String(), user.Email, user.Role, permissions, s.secret, 15*time.Minute)
+	accessToken, err := utils.GenerateToken(user.ID.String(), user.Email, user.FullName, user.Role, permissions, s.secret, 15*time.Minute)
 	if err != nil {
 		return nil, nil, "", "", err
 	}
 
 	// Refresh Token (7 Hari)
-	refreshToken, err := utils.GenerateToken(user.ID.String(), user.Email, user.Role, permissions, s.secret, 7*24*time.Hour)
+	refreshToken, err := utils.GenerateToken(user.ID.String(), user.Email, user.FullName, user.Role, permissions, s.secret, 7*24*time.Hour)
 	if err != nil {
 		return nil, nil, "", "", err
 	}
@@ -133,7 +133,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 	}
 
 	// Generate new access token
-	return utils.GenerateToken(claims.UserID, claims.Email, claims.Role, permissions, s.secret, 15*time.Minute)
+	return utils.GenerateToken(claims.UserID, claims.Email, claims.FullName, claims.Role, permissions, s.secret, 15*time.Minute)
 }
 
 func (s *AuthService) GetAllUsers(page, limit int, search string) ([]model.User, int64, error) {

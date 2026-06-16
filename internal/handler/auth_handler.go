@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -81,7 +80,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		if errors.Is(err, service.ErrInvalidCredentials) {
 			status = http.StatusUnauthorized
 		} else {
-			log.Printf("Login error: %v", err)
+			utils.Log.Error("Login error", zap.Error(err))
 		}
 
 		utils.ErrorResponse(c, status, err.Error(), nil)
@@ -147,11 +146,12 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 	email, _ := c.Get("email")
 	role, _ := c.Get("role")
 	perms, _ := c.Get("permissions")
+	fullName, _ := c.Get("full_name")
 
 	utils.SuccessResponse(c, http.StatusOK, "Current user info fetched", dto.UserResponse{
 		ID:          userID.(string),
 		Email:       email.(string),
-		FullName:    "", // Tips: Anda bisa menambahkan FullName ke JWT Claims agar field ini tidak kosong
+		FullName:    fullName.(string),
 		Role:        role.(string),
 		Permissions: perms.([]string),
 	})
