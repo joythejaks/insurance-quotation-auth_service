@@ -44,50 +44,51 @@ APP_PORT=8080
 JWT_SECRET=your_super_secret_key
 ```
 
-## 🏃 Menjalankan Aplikasi
+## 🏃 Running the Application
 
-1. **Instalasi Dependency**:
+1. **Install Dependencies**:
 
-   ```bash
+```bash
    go mod tidy
-   ```
+```
 
-2. **Menjalankan Migrasi Database**:
+2. **Run Database Migrations**:
 
-   ```bash
+```bash
    make migrate-up
-   ```
+```
 
 3. **Generate Swagger Docs**:
 
-   ```bash
+```bash
    swag init -g cmd/api/main.go
-   ```
+```
 
-4. **Jalankan Aplikasi**:
-   ```bash
+4. **Start the Application**:
+
+```bash
    go run cmd/api/main.go
-   ```
+```
 
-## 📖 Dokumentasi API
+## 📖 API Documentation
 
-Setelah aplikasi berjalan, buka browser dan akses:
+Once the application is running, open your browser and navigate to:
 `http://localhost:8080/swagger/index.html`
 
-## 📂 Struktur Proyek
+## 📂 Project Structure
 
 ```text
-├── cmd/api             # Entry point aplikasi
-├── docs/               # Dokumentasi Swagger yang di-generate
+├── cmd/api             # Application entry point
+├── docs/               # Generated Swagger documentation
 ├── internal/
-│   ├── config/         # Konfigurasi aplikasi & env
+│   ├── config/         # Application & environment configuration
 │   ├── dto/            # Data Transfer Objects (Request/Response)
-│   ├── handler/        # Layer Controller / Entry point HTTP
+│   ├── handler/        # Controller layer / HTTP entry point
 │   ├── middleware/     # Middleware (Auth, Log, Error)
-│   ├── model/          # Entity / Skema Database
-│   ├── repository/     # Layer akses Database
-│   ├── service/        # Layer Logika Bisnis
-│   ├── utils/          # Helper (JWT, Logger, Response)
-│   └── router/         # Definisi rute API
-└── migrations/         # File SQL migrasi database
+│   ├── model/          # Entity / Database schema
+│   ├── repository/     # Database access layer
+│   ├── service/        # Business logic layer
+│   ├── utils/          # Helpers (JWT, Logger, Response)
+│   └── router/         # API route definitions
+└── migrations/         # Database migration SQL files
 ```
