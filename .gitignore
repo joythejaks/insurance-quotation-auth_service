@@ -1,0 +1,13 @@
+# Binary
+bin/
+main
+
+# Environments
+.env
+
+# Dependencies
+vendor/
+
+# IDE
+.vscode/
+.idea/
