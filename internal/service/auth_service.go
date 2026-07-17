@@ -16,6 +16,7 @@ import (
 var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
 	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrUserInactive       = errors.New("user account is inactive")
 )
 
 type AuthService struct {
@@ -56,30 +57,15 @@ func (s *AuthService) Register(
 		return nil, err
 	}
 
-	// Determine the role code to store
-	roleCode := "USER"
-	if req.Role != "" {
-		// Try to find by Name (e.g., "Administrator") or Code (e.g., "ADMIN")
-		role, err := s.roleRepo.FindByCode(req.Role)
-		if err != nil {
-			// If not found by code, try by Name
-			role, err = s.roleRepo.FindByName(req.Role)
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					return nil, errors.New("invalid role specified")
-				}
-				return nil, err
-			}
-		}
-		roleCode = role.Code
-	}
-
+	// Public self-registration always gets the default USER role.
+	// Elevating a user's role is only possible via the admin-only
+	// AssignRole flow (see AuthService.AssignRole).
 	user := model.User{
 		ID:           uuid.New(),
 		Email:        req.Email,
 		PasswordHash: hash,
 		FullName:     req.FullName,
-		Role:         roleCode,
+		Role:         "USER",
 		IsActive:     true,
 	}
 
@@ -97,6 +83,10 @@ func (s *AuthService) Login(req dto.LoginRequest) (*model.User, []string, string
 
 	if err := utils.CheckPassword(user.PasswordHash, req.Password); err != nil {
 		return nil, nil, "", "", ErrInvalidCredentials
+	}
+
+	if !user.IsActive {
+		return nil, nil, "", "", ErrUserInactive
 	}
 
 	// Fetch permissions for the role

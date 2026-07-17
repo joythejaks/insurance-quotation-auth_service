@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/jordisetiawan/insurance-auth-service/internal/config"
 	"github.com/jordisetiawan/insurance-auth-service/internal/database"
 	"github.com/jordisetiawan/insurance-auth-service/internal/handler"
@@ -28,6 +30,10 @@ import (
 // @in header
 // @name Authorization
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using existing environment variables")
+	}
+
 	cfg := config.LoadConfig()
 	utils.InitLogger()
 

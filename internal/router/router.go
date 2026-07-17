@@ -1,6 +1,8 @@
 package router
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/jordisetiawan/insurance-auth-service/docs"
 	"github.com/jordisetiawan/insurance-auth-service/internal/handler"
@@ -25,8 +27,9 @@ func SetupRouter(authHandler *handler.AuthHandler, secret string) *gin.Engine {
 	{
 		auth := api.Group("/auth")
 		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
+			authLimiter := middleware.RateLimiter(10, time.Minute)
+			auth.POST("/register", authLimiter, authHandler.Register)
+			auth.POST("/login", authLimiter, authHandler.Login)
 			auth.POST("/refresh", authHandler.Refresh)
 
 			// Protected routes

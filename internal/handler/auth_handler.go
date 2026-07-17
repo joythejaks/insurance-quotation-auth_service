@@ -77,9 +77,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		status := http.StatusInternalServerError
 
-		if errors.Is(err, service.ErrInvalidCredentials) {
+		switch {
+		case errors.Is(err, service.ErrInvalidCredentials):
 			status = http.StatusUnauthorized
-		} else {
+		case errors.Is(err, service.ErrUserInactive):
+			status = http.StatusForbidden
+		default:
 			utils.Log.Error("Login error", zap.Error(err))
 		}
 
@@ -142,18 +145,33 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Security BearerAuth
 // @Router /auth/me [get]
 func (h *AuthHandler) GetMe(c *gin.Context) {
-	userID, _ := c.Get("user_id")
-	email, _ := c.Get("email")
-	role, _ := c.Get("role")
-	perms, _ := c.Get("permissions")
-	fullName, _ := c.Get("full_name")
+	userID, okID := c.Get("user_id")
+	email, okEmail := c.Get("email")
+	role, okRole := c.Get("role")
+	perms, okPerms := c.Get("permissions")
+	fullName, okFullName := c.Get("full_name")
+
+	if !okID || !okEmail || !okRole || !okPerms || !okFullName {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to resolve current user context", nil)
+		return
+	}
+
+	userIDStr, ok1 := userID.(string)
+	emailStr, ok2 := email.(string)
+	roleStr, ok3 := role.(string)
+	fullNameStr, ok4 := fullName.(string)
+	permsSlice, ok5 := perms.([]string)
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 {
+		utils.ErrorResponse(c, http.StatusInternalServerError, "Failed to resolve current user context", nil)
+		return
+	}
 
 	utils.SuccessResponse(c, http.StatusOK, "Current user info fetched", dto.UserResponse{
-		ID:          userID.(string),
-		Email:       email.(string),
-		FullName:    fullName.(string),
-		Role:        role.(string),
-		Permissions: perms.([]string),
+		ID:          userIDStr,
+		Email:       emailStr,
+		FullName:    fullNameStr,
+		Role:        roleStr,
+		Permissions: permsSlice,
 	})
 }
 

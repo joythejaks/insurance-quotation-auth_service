@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 type Config struct {
 	AppPort    string
@@ -14,6 +17,11 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
+	jwtSecret, ok := os.LookupEnv("JWT_SECRET")
+	if !ok || jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable must be set (no insecure default is provided)")
+	}
+
 	return &Config{
 		AppPort:    getEnv("APP_PORT", "8080"),
 		DBHost:     getEnv("DB_HOST", "localhost"),
@@ -22,7 +30,7 @@ func LoadConfig() *Config {
 		DBUser:     getEnv("DB_USER", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", "postgres"),
 		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
-		JWTSecret:  getEnv("JWT_SECRET", "super-secret-key"),
+		JWTSecret:  jwtSecret,
 	}
 }
 
